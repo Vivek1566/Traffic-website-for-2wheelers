@@ -2,22 +2,22 @@
 
 > **AI-powered traffic surveillance and two-wheeler violation analysis workstation**
 
-Traffic Eye AI is a full-stack traffic enforcement review platform that transforms uploaded road footage into a searchable, evidence-backed incident report. It combines YOLOv8 object detection, ByteTrack multi-object tracking, spatial rider clustering, and a modern React operations dashboard to identify and document two-wheeler violations.
+Traffic Eye AI is a full-stack traffic enforcement review platform that transforms uploaded road footage into a searchable, evidence-backed incident report. It combines a custom-trained **YOLO11m** model, ByteTrack multi-object tracking, spatial rider clustering, and a modern React operations dashboard to identify and document two-wheeler violations.
 
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)](https://opencv.org/)
-[![YOLOv8](https://img.shields.io/badge/YOLOv8-111827?style=for-the-badge&logo=yolo&logoColor=white)](https://docs.ultralytics.com/)
+[![YOLO11m](https://img.shields.io/badge/YOLO-11m-111827?style=for-the-badge&logo=yolo&logoColor=white)](https://docs.ultralytics.com/)
 
 ---
 
 ## 🎯 Project Overview
 
-Traffic Eye AI is designed to assist traffic monitoring teams with structured post-processing of surveillance footage. The system accepts a video, analyzes each relevant frame, tracks motorcycles and riders, evaluates helmet and passenger conditions, generates an annotated H.264 output, captures forensic snapshots, and presents all findings in a dedicated review workstation.
+Traffic Eye AI is designed to assist traffic monitoring teams with structured post-processing of surveillance footage. The system accepts a video, analyzes sampled frames with YOLO11m, tracks motorcycles and riders, evaluates helmet and passenger conditions, generates an annotated H.264 output, captures forensic snapshots, and presents findings in a dedicated review workstation.
 
-The application is especially useful for demonstrating:
+The application demonstrates:
 
 - AI-assisted traffic surveillance
 - Two-wheeler safety enforcement workflows
@@ -31,13 +31,14 @@ The application is especially useful for demonstrating:
 |---|---|
 | **Triple-riding detection** | Groups riders spatially and flags motorcycle clusters containing three or more people. |
 | **No-helmet detection** | Detects uncovered heads within the rider zone and records them as helmet violations. |
-| **Vehicle tracking** | Uses Ultralytics YOLOv8 with ByteTrack for persistent object tracking. |
-| **Per-vehicle deduplication** | Prevents repeated detections of the same violation through track IDs and spatial-temporal cooldown logic. |
+| **YOLO11m object detection** | Uses the project's custom-trained YOLO11m model to identify road users and related classes. |
+| **Vehicle tracking** | Uses ByteTrack for persistent multi-object tracking across sampled video frames. |
+| **Per-vehicle deduplication** | Reduces repeated incident records with track IDs and spatial-temporal cooldown logic. |
 | **Annotated video output** | Produces a browser-ready H.264/MP4 stream with color-coded AI overlays. |
-| **Evidence snapshots** | Captures timestamped JPEG frames for every unique violation incident. |
-| **Incident review dashboard** | Provides search, filtering, playback controls, timeline seeking, and active incident synchronization. |
+| **Evidence snapshots** | Captures JPEG frames for each unique violation incident. |
+| **Incident review dashboard** | Provides search, filtering, playback controls, incident seeking, and synchronized review. |
 | **Electronic challan** | Generates a printable, evidence-backed traffic citation with fine and statutory section details. |
-| **Audit export** | Exports the complete incident queue to CSV for reporting and external analysis. |
+| **Audit export** | Exports the incident queue to CSV for reporting and external analysis. |
 
 ---
 
@@ -45,27 +46,27 @@ The application is especially useful for demonstrating:
 
 ### Command-Center Dashboard
 
-A dark, traffic-enforcement-inspired React interface presents real-time processing status, summary metrics, footage duration, violation counts, and active incident information.
+A dark, traffic-enforcement-inspired React interface presents processing status, summary metrics, footage duration, violation counts, and incident information.
 
 ### Interactive Evidence Playback
 
 - AI-annotated H.264 video player
-- Raw incident timestamp synchronization
+- Incident timestamp synchronization
 - Play, pause, rewind, forward, and variable playback speed
 - Direct seeking to detected incidents
-- Frame-by-frame forensic context
+- Source frame and timestamp context
 
 ### Incident Investigation Queue
 
-- Violation and text search
+- Violation-type and text search
 - Separate filters for triple riding and no-helmet incidents
-- Thumbnail evidence previews
+- Evidence snapshot previews
 - Full-resolution snapshot lightbox
-- Timestamp, frame number, and descriptive offense details
+- Timestamp, frame number, and incident description
 
 ### Electronic E-Challan
 
-Every incident can be opened as an official-style citation containing:
+Each incident can be opened as a printable citation containing:
 
 - Incident and citation numbers
 - Violation classification
@@ -86,9 +87,9 @@ Uploaded Video
 FastAPI Upload Endpoint
       │
       ▼
-YOLOv8 Frame Detection
+YOLO11m Frame Detection
       │
-      ├── Motorcycle / Rider
+      ├── Rider
       ├── Helmet / No-Helmet
       └── License Plate
       │
@@ -116,22 +117,22 @@ React Incident Review Dashboard
 
 ### Detection Approach
 
-The backend runs YOLO tracking inference every third frame to balance detection quality with CPU performance. It builds scale-invariant motorcycle clusters from rider detections, associates nearby helmet and no-helmet detections, and calculates an effective passenger count.
+The backend runs tracking inference every third frame to balance detection quality with CPU performance. It builds scale-invariant motorcycle clusters from rider detections, associates nearby helmet and no-helmet detections, and calculates an effective passenger count.
 
 A dual deduplication strategy minimizes duplicate evidence:
 
-1. **Track-ID deduplication** — one violation key is maintained per tracked vehicle and violation type.
-2. **Spatial-temporal cooldown** — if tracker IDs switch, incidents remain grouped by location and time proximity.
+1. **Track-ID deduplication** — maintains a violation key per tracked vehicle and violation type.
+2. **Spatial-temporal cooldown** — helps suppress duplicate entries when tracker IDs change for a nearby vehicle.
 
 ## 🎨 Visual Detection Legend
 
 | Visual | Meaning |
 |---|---|
-| 🔴 Red | Triple riding: three or more persons detected on one motorcycle |
-| 🟠 Orange | Rider or passenger without a helmet |
-| 🟡 Yellow | License plate detected or plate marker |
+| 🔴 Red | Triple riding: three or more people detected on one motorcycle |
+| 🟠 Orange | No-helmet detection |
+| 🟡 Yellow | Plate detection / plate marker |
 | 🟢 Green | Helmet detected |
-| 🟡 Amber | Individual rider bounding region |
+| 🟡 Amber | Rider bounding region |
 
 ---
 
@@ -141,8 +142,8 @@ A dual deduplication strategy minimizes duplicate evidence:
 Traffic-website-for-2wheelers/
 ├── backend/
 │   ├── main.py                    # FastAPI application and upload API
-│   ├── detector.py                # YOLO/ByteTrack analysis engine
-│   ├── weights/                   # Custom YOLO model weights
+│   ├── detector.py                # YOLO11m/ByteTrack analysis pipeline
+│   ├── weights/                   # Custom-trained YOLO11m checkpoint
 │   └── static/
 │       ├── videos/                # Uploaded and annotated MP4 outputs
 │       └── evidence/              # JPEG violation snapshots
@@ -150,8 +151,7 @@ Traffic-website-for-2wheelers/
 │   ├── src/
 │   │   ├── App.jsx                # Dashboard, uploader, player, and review UI
 │   │   ├── main.jsx               # React entry point
-│   │   └── index.css              # Tailwind imports and cyber dashboard styles
-│   ├── public/                    # Static frontend assets
+│   │   └── index.css              # Tailwind imports and dashboard styles
 │   ├── package.json               # React and Vite dependencies
 │   └── vite.config.js             # Development server and API proxy configuration
 ├── requirements.txt               # Backend Python dependencies
@@ -160,31 +160,23 @@ Traffic-website-for-2wheelers/
 
 ### Backend
 
-The backend is a FastAPI service that:
-
-- Hosts video and evidence media through `StaticFiles`
-- Exposes `POST /api/process-video`
-- Loads the custom YOLO model at startup
-- Processes uploaded footage frame by frame
-- Encodes the annotated output directly through FFmpeg
-- Returns incident metadata and generated media paths
+The FastAPI service hosts video and evidence files, exposes `POST /api/process-video`, loads the custom model, processes uploaded footage frame by frame, encodes the annotated output, and returns incident metadata and generated media paths.
 
 ### Computer Vision Engine
 
-`backend/detector.py` contains the complete enforcement pipeline:
+`backend/detector.py` contains the analysis pipeline:
 
-- Rider, helmet, no-helmet, plate, and vehicle detections
-- ByteTrack tracking
+- YOLO11m detection and ByteTrack tracking
 - Distance-adaptive confidence thresholds
 - Scale-invariant tandem rider clustering
 - Triple-riding and no-helmet evaluation
 - Bounding-box visualization
-- Incident cooldown logic
+- Track and spatial-temporal incident deduplication
 - Evidence capture and H.264 encoding
 
 ### Frontend
 
-The frontend is built with React, Vite, Tailwind CSS, and Lucide icons. `App.jsx` implements video upload, drag-and-drop ingestion, API communication, filtering, CSV export, evidence display, playback controls, snapshot lightboxes, and print-ready challans.
+The frontend is built with React, Vite, Tailwind CSS, and Lucide icons. `frontend/src/App.jsx` implements video upload, drag-and-drop ingestion, API communication, filtering, CSV export, evidence display, playback controls, snapshot lightboxes, and printable challans.
 
 ---
 
@@ -193,19 +185,19 @@ The frontend is built with React, Vite, Tailwind CSS, and Lucide icons. `App.jsx
 ### Backend
 
 - **FastAPI** — REST API and static media serving
-- **Ultralytics YOLOv8** — Two-wheeler object detection
+- **Ultralytics YOLO11m** — Custom-trained two-wheeler detection model
 - **ByteTrack** — Multi-object tracking
 - **OpenCV** — Frame processing and evidence capture
-- **PyTorch** — YOLO inference and GPU acceleration
+- **PyTorch** — Model inference and GPU acceleration
 - **FFmpeg / imageio-ffmpeg** — Browser-compatible H.264 video encoding
 - **Pydantic** — API request and response modeling
 
 ### Frontend
 
 - **React 18** — Component-based interface
-- **Vite 5** — Fast development and production builds
-- **Tailwind CSS 3** — Responsive traffic control UI
-- **Lucide React** — Consistent professional icon system
+- **Vite 5** — Development and production builds
+- **Tailwind CSS 3** — Responsive dashboard UI
+- **Lucide React** — Interface icon system
 
 ## 📊 Repository Composition
 
@@ -248,17 +240,17 @@ The response contains the generated video URL, source duration, violation count,
 }
 ```
 
-## ⚙️ Model and Hardware Behavior
+## ⚙️ Model and Hardware
 
-The detection engine looks for custom trained weights at:
+Traffic Eye AI uses a custom-trained **YOLO11m** model checkpoint located at:
 
 ```text
 backend/weights/best.pt
 ```
 
-When a compatible CUDA-enabled GPU is available, the model runs in GPU FP16 mode. Otherwise, it automatically uses CPU inference with frame skipping and an optimized detection configuration.
+The backend selects a CUDA device and uses FP16 inference when a compatible GPU is available. Otherwise, it runs inference on CPU with frame skipping and an optimized detection configuration.
 
-License plate detections are visually marked, while the current enforcement incident pipeline is specifically configured for:
+License plate classes can be displayed in the visual overlay, while the incident-review pipeline currently records these violation types:
 
 - Triple riding
 - No helmet
@@ -274,7 +266,7 @@ AI-generated evidence should remain subject to human review and appropriate lega
 - Live CCTV stream ingestion
 - Multi-camera correlation and geographic mapping
 - License plate OCR and vehicle identification
-- Automatic evidence case management
+- Evidence case management
 - Role-based operator authentication
 - Cloud storage and audit logging
 - Configurable region-specific fines and traffic sections
@@ -284,7 +276,7 @@ AI-generated evidence should remain subject to human review and appropriate lega
 
 ## 📄 License
 
-No license has currently been added to this repository. The repository owner should add an appropriate open-source or proprietary license before redistribution or public deployment.
+No license has currently been added to this repository. Add an appropriate open-source or proprietary license before redistribution or public deployment.
 
 ## 👤 Author
 
