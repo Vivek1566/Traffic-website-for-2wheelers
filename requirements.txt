@@ -1,0 +1,17 @@
+# Traffic Eye AI - Core Dependencies
+# (FFmpeg is installed and enabled for browser-standard H.264 video encoding)
+# To install FFmpeg on another Windows machine: winget install Gyan.FFmpeg
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+ultralytics>=8.1.0
+opencv-python-headless>=4.9.0
+torch>=2.0.0
+torchvision>=0.15.0
+pydantic>=2.6.0
+python-multipart>=0.0.9
+aiofiles>=23.2.0
+numpy>=1.24.0
+pillow>=10.0.0
+imageio-ffmpeg>=0.4.9
+
+
